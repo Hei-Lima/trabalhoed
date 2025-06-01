@@ -1,6 +1,7 @@
 #include "db.h"
 #include "uilib.h"
 #include <stdio.h>
+#define CSV_PATH "bd_paciente.csv"
 
 /*
  * Consulta function
@@ -77,7 +78,7 @@ void print_lista_pacientes(BDPaciente* db) {
 }
 
 // Handle Main Menu Choices and return the option.
-char handle_main_menu() {
+char handle_main_menu_choices() {
 
     printf("HEALTHSYS\n");
     printf("1 - Consultar Paciente\n");
@@ -92,39 +93,48 @@ char handle_main_menu() {
     return choice;
 }
 
-int main() {
-    BDPaciente* db = db_create_db();
-    db_populate_db_from_csv("pacientes6000.csv", db);
+// Handle main menu logic.
+void handle_main_menu(BDPaciente* db) {
+        // Initialize choice to a random char that isn't q. 
+        char choice = ' ';
+
+        // While choice != q, continue in the main menu.
+        while (choice != 'Q' && choice != 'q') {
+            // ui_cls clears the screen.
+            ui_cls();
+            choice = handle_main_menu_choices();
+            ui_cls();
     
+            switch (choice) {
+            case '1':
+                consultar_paciente(db);
+                break;
+            case '5':    
+                print_lista_pacientes(db);
+                break;
+            case 'q':
+                break;
+            case 'Q':
+                break;
+            default:
+                ui_print_option_warning(choice);
+                break;
+            }
+        }
+}
+
+int main() {
+    // Initialize DB.
+    BDPaciente* db = db_create_db();
+    db_populate_db_from_csv(CSV_PATH, db);
+    
+    // Print Healthsys logo.
     ui_print_logo();
 
-    // Initialize choice to a random char that isn't q. 
-    char choice = ' ';
+    // Handle all main menu logic and choices.
+    handle_main_menu(db);
 
-    // While choice != q, continue in the main menu.
-    while (choice != 'Q') {
-        // ui_cls clears the screen.
-        ui_cls();
-        choice = handle_main_menu();
-        ui_cls();
-
-        switch (choice) {
-        case '1':
-            consultar_paciente(db);
-            break;
-        case '5':    
-            print_lista_pacientes(db);
-            break;
-        case 'q':
-            break;
-        case 'Q':
-            break;
-        default:
-            ui_print_option_warning(choice);
-            break;
-        }
-    }
-
+    // Free the DB.
     db_destroy_db(db);
 
     return 0;

@@ -1,6 +1,7 @@
 import random
 import csv
 from datetime import datetime, timedelta
+import itertools
 
 # Lista de nomes
 NOMES = [
@@ -21,6 +22,33 @@ SOBRENOMES = [
     "Andrade", "Ferreira", "Moura", "Cunha", "Batista", "Lopes", "Miranda", "Paixão"
 ]
 
+# Nomes especiais obrigatórios
+NOMES_ESPECIAIS = [
+    {"nome": "Gian Lucca Decote Paneto", "cpf": "000.000.000-000"},
+    {"nome": "Thiago Paixão", "cpf": "PR0.FES.SS0-R0"},
+    {"nome": "Heitor Lima Peixoto", "cpf": "999.999.999-99"}
+]
+
+def gerar_todas_permutacoes_nomes():
+    """Gera todas as combinações possíveis de nomes com 1-2 sobrenomes"""
+    permutacoes = []
+    
+    # Combinações com 1 sobrenome
+    for nome in NOMES:
+        for sobrenome in SOBRENOMES:
+            permutacoes.append(f"{nome} {sobrenome}")
+    
+    # Combinações com 2 sobrenomes
+    for nome in NOMES:
+        for sobrenome1, sobrenome2 in itertools.combinations(SOBRENOMES, 2):
+            permutacoes.append(f"{nome} {sobrenome1} {sobrenome2}")
+    
+    # Remove os nomes especiais se já existirem na lista
+    nomes_especiais_str = [item["nome"] for item in NOMES_ESPECIAIS]
+    permutacoes = [nome for nome in permutacoes if nome not in nomes_especiais_str]
+    
+    return permutacoes
+
 def gerar_cpf():
     """Gera um CPF válido aleatório"""
     def calcular_digito(cpf_parcial):
@@ -39,13 +67,6 @@ def gerar_cpf():
     cpf_str = ''.join(map(str, cpf))
     return f"{cpf_str[:3]}.{cpf_str[3:6]}.{cpf_str[6:9]}-{cpf_str[9:]}"
 
-def gerar_nome():
-    """Gera um nome completo com 1 nome e 1-2 sobrenomes"""
-    nome = random.choice(NOMES)
-    num_sobrenomes = random.choice([1, 2])
-    sobrenomes = random.sample(SOBRENOMES, num_sobrenomes)
-    return f"{nome} {' '.join(sobrenomes)}"
-
 def gerar_data():
     """Gera uma data aleatória entre 1970 e 2025"""
     inicio = datetime(1970, 1, 1)
@@ -57,10 +78,10 @@ def gerar_data():
     
     return data_aleatoria.strftime("%Y-%m-%d")
 
-def gerar_linha(id_paciente):
-    """Gera uma linha completa do CSV"""
-    cpf = gerar_cpf()
-    nome = gerar_nome()
+def gerar_linha(id_paciente, nome, cpf=None):
+    """Gera uma linha completa do CSV com nome específico"""
+    if cpf is None:
+        cpf = gerar_cpf()
     idade = random.randint(18, 90)
     data = gerar_data()
     
@@ -68,25 +89,64 @@ def gerar_linha(id_paciente):
 
 def gerar_csv(num_linhas, nome_arquivo="pacientes_gerados.csv"):
     """Gera um arquivo CSV com o número especificado de linhas"""
+    # Gera todas as permutações possíveis
+    nomes_unicos = gerar_todas_permutacoes_nomes()
+    
+    # Embaralha a lista para ordem aleatória
+    random.shuffle(nomes_unicos)
+    
+    # Calcula quantas permutações temos (incluindo os nomes especiais)
+    total_permutacoes = len(nomes_unicos) + len(NOMES_ESPECIAIS)
+    
+    print(f"Total de permutações únicas possíveis: {total_permutacoes}")
+    
+    if num_linhas > total_permutacoes:
+        print(f"AVISO: Solicitadas {num_linhas} linhas, mas só existem {total_permutacoes} permutações únicas.")
+        print(f"Gerando {total_permutacoes} linhas com nomes únicos.")
+        num_linhas = total_permutacoes
+    
     with open(nome_arquivo, 'w', newline='', encoding='utf-8') as arquivo:
         writer = csv.writer(arquivo)
         
-        for i in range(1, num_linhas + 1):
-            linha = gerar_linha(i)
+        # Primeiro, escreve os nomes especiais
+        for i, especial in enumerate(NOMES_ESPECIAIS):
+            linha = gerar_linha(i + 1, especial["nome"], especial["cpf"])
             writer.writerow(linha)
+        
+        # Depois, escreve os nomes restantes
+        nomes_restantes = num_linhas - len(NOMES_ESPECIAIS)
+        for i in range(nomes_restantes):
+            if i < len(nomes_unicos):
+                nome = nomes_unicos[i]
+                linha = gerar_linha(len(NOMES_ESPECIAIS) + i + 1, nome)
+                writer.writerow(linha)
     
     print(f"Arquivo '{nome_arquivo}' gerado com {num_linhas} linhas!")
+    print(f"Incluindo {len(NOMES_ESPECIAIS)} nomes especiais obrigatórios.")
 
 # Exemplo de uso
 if __name__ == "__main__":
+    # Calcula o máximo de permutações possíveis
+    total_max = len(NOMES) * len(SOBRENOMES) + len(NOMES) * len(SOBRENOMES) * (len(SOBRENOMES) - 1) // 2 + len(NOMES_ESPECIAIS)
+    
+    print(f"Máximo de nomes únicos possíveis: {total_max}")
+    print("Nomes especiais que sempre serão incluídos:")
+    for especial in NOMES_ESPECIAIS:
+        print(f"  - {especial['nome']} (CPF: {especial['cpf']})")
+    print()
+    
     # Gera 100 linhas por padrão
-    num_linhas = int(input("Quantas linhas deseja gerar? (padrão: 100): ") or "100")
+    num_linhas = int(input(f"Quantas linhas deseja gerar? (padrão: 100, máx: {total_max}): ") or "100")
     nome_arquivo = input("Nome do arquivo (padrão: pacientes_gerados.csv): ") or "pacientes_gerados.csv"
     
     gerar_csv(num_linhas, nome_arquivo)
     
     # Exibe algumas linhas de exemplo
     print("\nPrimeiras 5 linhas geradas:")
-    for i in range(1, 6):
-        linha = gerar_linha(i)
-        print(",".join(map(str, linha)))
+    with open(nome_arquivo, 'r', encoding='utf-8') as arquivo:
+        reader = csv.reader(arquivo)
+        for i, linha in enumerate(reader):
+            if i < 5:
+                print(",".join(linha))
+            else:
+                break
