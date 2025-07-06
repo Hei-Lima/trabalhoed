@@ -5,13 +5,13 @@ CC = gcc
 CFLAGS = -Wall
 
 # Compile all C files
-SRCS = main.c uilib.c db.c trie.c
+SRCS = main.c uilib.c db.c paciente.c list.c
 
 # Object files (replace .c with .o)
 OBJS = $(SRCS:.c=.o)
 
 # Test files
-TEST_SRCS = test.c uilib.c db.c trie.c
+TEST_SRCS = test.c uilib.c db.c paciente.c list.c
 TEST_OBJS = $(TEST_SRCS:.c=.o)
 
 # Executable names
@@ -60,5 +60,3 @@ clean:
 
 # Phony targets (not files) to avoid conflicts with files of the same name
 .PHONY: all compile run clean test valgrind memcheck
-
-# PS: Tava até fazendo minha versão, mas a sua funciona tão bem...

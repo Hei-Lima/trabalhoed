@@ -10,16 +10,16 @@ typedef struct paciente Paciente;
 // This struct implements the BDPaciente type.
 typedef struct bdpaciente BDPaciente;
 
-#include "trie.h"
+#include "list.h"
 
 // Initialize a patient and return its pointer.
-Paciente* db_create_paciente(int id, char* CPF, char* nome, int idade, char* data_cadastro);
+Paciente* db_create_paciente(BDPaciente* db, int id, char* CPF, char* nome, int idade, char* data_cadastro);
 
 // Initialize a BDPaciente and return its pointer.
 BDPaciente* db_create_db();
 
 // Populate the database from a CSV file.
-void db_populate_db_from_csv(char* path, BDPaciente* db);
+void db_create_list_from_csv(char* path, BDPaciente* db);
 
 // Print a patient by ID.
 void db_print_patient(BDPaciente* db, int id);

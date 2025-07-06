@@ -8,30 +8,26 @@
  * @param option: 1 = Nome, 2 = CPF
  */
 void consulta(BDPaciente* db, int option) {
-    int current_size = 0;
-    int max_size = 121;
+    char string[122];
     
-    char string[max_size + 1];
-    char lastchar;
-    string[0] = '\0';
-
-    do {
-        // UI
+    printf("Digite o %s para buscar (ou 'sair' para voltar): ", 
+           option == 1 ? "nome" : "CPF");
+    
+    if (fgets(string, sizeof(string), stdin) != NULL) {
+        // Remove newline if present
+        string[strcspn(string, "\n")] = '\0';
+        
+        if (strcmp(string, "sair") == 0) {
+            return;
+        }
+        
+        ui_cls();
         ui_print_consulta_top();
         db_search_by_prefix(db, string, option);
-        ui_print_consulta_bottom(string);
-
-        // Input
-        lastchar = ui_getchar();
-        if (lastchar == '_') {
-            current_size = 0;
-            string[0] = '\0';
-        } else {
-            ui_append_char(lastchar, string, current_size, max_size);
-            current_size++;
-        }
-        ui_cls();
-    } while (lastchar != '-');
+        
+        printf("\nPressione Enter para continuar...");
+        getchar();
+    }
 }
 
 // Handle the consulta option.
@@ -126,7 +122,7 @@ void handle_main_menu(BDPaciente* db) {
 int main() {
     // Initialize DB.
     BDPaciente* db = db_create_db();
-    db_populate_db_from_csv(CSV_PATH, db);
+    db_create_list_from_csv(CSV_PATH, db);
     
     // Print Healthsys logo.
     ui_print_logo();
