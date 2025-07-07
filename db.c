@@ -7,7 +7,7 @@
 #include "paciente.h"
 
 // Max number of entries in the print all patients function.
-#define PAGE_SIZE 10
+const int PAGE_SIZE = 10;
 
 // Implements the BDPaciente type.
 typedef struct bdpaciente
@@ -89,4 +89,47 @@ void db_destroy_db(BDPaciente* db) {
 
 void db_search_by_prefix(BDPaciente* db, char* prefix, int filter) {
     ll_print_by_prefix(db->lista_pacientes, prefix, filter);
+}
+
+// Remove a patient by ID.
+void db_remove_paciente(BDPaciente* db, int id) {
+    ll_remove_node(db->lista_pacientes, id);
+}
+
+// Update a patient by ID. Returns 1 if updated, 0 if not found.
+int db_update_paciente(BDPaciente* db, int id, char* new_cpf, char* new_nome, int new_idade, char* new_data_cadastro) {
+    Paciente* paciente = ll_search_node(db->lista_pacientes, id);
+    if (!paciente) return 0;
+    if (new_cpf) pc_set_cpf(paciente, new_cpf);
+    if (new_nome) pc_set_nome(paciente, new_nome);
+    if (new_idade >= 0) pc_set_idade(paciente, new_idade);
+    if (new_data_cadastro) pc_set_data_cadastro(paciente, new_data_cadastro);
+    return 1;
+}
+
+// Função auxiliar para salvar um paciente no CSV
+static void save_paciente_csv(Paciente* p, void* file_ptr) {
+    FILE* csv = (FILE*)file_ptr;
+    fprintf(csv, "%d,%s,%s,%d,%s\n", pc_get_id(p), pc_get_cpf(p), pc_get_nome(p), pc_get_idade(p), pc_get_data_cadastro(p));
+}
+
+// Save the database to a CSV file.
+void db_save_to_csv(BDPaciente* db, char* path) {
+    FILE* csv = fopen(path, "w");
+    if (!csv) {
+        printf("Erro ao salvar CSV!\n");
+        return;
+    }
+    ll_for_each(db->lista_pacientes, save_paciente_csv, csv);
+    fclose(csv);
+}
+
+// Retorna o próximo ID disponível para paciente
+int db_get_next_id(BDPaciente* db) {
+    return ll_get_max_id(db->lista_pacientes) + 1;
+}
+
+// Busca paciente por ID
+Paciente* db_get_paciente_by_id(BDPaciente* db, int id) {
+    return ll_search_node(db->lista_pacientes, id);
 }

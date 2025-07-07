@@ -26,6 +26,10 @@ typedef struct list
 	ListNode* tail;
 } List;
 
+// Forward declarations for recursive functions
+void ll_destroy_list_rec(ListNode* node);
+void ll_print_by_prefix_rec(ListNode* node, char* prefix, int search_type);
+
 // Create a list and return its pointer.
 List* ll_create_list() {
     List* list = (List*)malloc(sizeof(List));
@@ -175,4 +179,42 @@ void ll_print_page(List* list, int start, int end) {
         node = node->next;
         current++;
     }
+}
+
+// Remove a node from the list by id.
+void ll_remove_node(List* list, int id) {
+    if (!list || ll_is_empty(list)) return;
+    ListNode* node = list->head;
+    while (node) {
+        if (node->id == id) {
+            if (node->prev) node->prev->next = node->next;
+            else list->head = node->next;
+            if (node->next) node->next->prev = node->prev;
+            else list->tail = node->prev;
+            ll_destroy_node(node);
+            return;
+        }
+        node = node->next;
+    }
+}
+
+void ll_for_each(List* list, void (*callback)(Paciente*, void*), void* user_data) {
+    if (!list || !callback) return;
+    ListNode* node = list->head;
+    while (node) {
+        callback(node->paciente, user_data);
+        node = node->next;
+    }
+}
+
+// Get the maximum ID in the list.
+int ll_get_max_id(List* list) {
+    int max_id = 0;
+    ListNode* node = list->head;
+    while (node) {
+        int id = pc_get_id(node->paciente);
+        if (id > max_id) max_id = id;
+        node = node->next;
+    }
+    return max_id;
 }

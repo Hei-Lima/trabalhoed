@@ -35,4 +35,10 @@ void ll_print_by_prefix(List* list, char* prefix, int search_type);
 // Print a page of patients from the list.
 void ll_print_page(List* list, int start, int end);
 
+// Função para iterar sobre todos os pacientes da lista, chamando um callback
+void ll_for_each(List* list, void (*callback)(Paciente*, void*), void* user_data);
+
+// Get the maximum ID in the list.
+int ll_get_max_id(List* list);
+
 #endif
