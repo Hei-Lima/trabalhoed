@@ -34,6 +34,23 @@ Para trocar o CSV que o programa irá carregar, altere o #define CSV_PATH no arq
 
 Tentamos deixar o máximo abstrato possível. O DB não tem acesso ao TrieNode e a main não tem acesso a Pacientes nem a nada relativo às implementações do banco de dados. Todas as funcionalidades de módulos importados são invocadas por chamadas de função, nunca por modificação dos objetos em si. Tudo fica bem simples e transparente. A ideia foi fazer na main uma arquitetura modular que imite uma página HTML, onde cada função seria uma página diferente, e as funcionalidades da página são implementadas por funções externas, como o módulo UI Lib.
 
+# Funcionalidades do Programa
+
+#### 1. Consulta
+Permite consulta por nome e CPF.
+
+#### 2. Inserção
+Adiciona novo paciente com ID automático e único.
+
+#### 3. Atualização
+  Permite editar qualquer campo do paciente. Use '-' para manter o valor atual.
+
+#### 4. Remoção
+  Remove paciente pelo ID, com confirmação.
+
+#### 5. Listagem
+  Mostra pacientes paginados (10 por página).
+
 # Como o programa funciona?
 
 A primeira coisa que o programa faz é carregar os dados de um CSV para o Banco de Dados, que é implementado em um módulo db.c.
