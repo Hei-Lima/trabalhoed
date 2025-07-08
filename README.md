@@ -40,50 +40,19 @@ A primeira coisa que o programa faz é carregar os dados de um CSV para o Banco 
 
 O banco de dados tem a seguinte estrutura:
 
-![alt text](misc/bd.svg)
+LISTA DUPLAMENTE ENCADEADA DOS PACIENTES
 
-Uma [trie](https://pt.wikipedia.org/wiki/Trie) de CPFs, outra trie de nomes, um [array](https://pt.wikipedia.org/wiki/Arranjo_(computa%C3%A7%C3%A3o)) de estruturas de paciente e um inteiro com a quantidade de pacientes.
+Esse banco é implementado com uma estrutura chamada BD_Paciente, que armazena os ponteiros para uma lista com os pacientes.
 
-Esse banco é implementado com uma estrutura chamada BD_Paciente, que armazena os ponteiros para as tries, o array e o inteiro.
+# Lista paciente
 
-Os motivos que levaram à escolha dessas estruturas e como cada uma funciona serão explicados abaixo.
-
-# Tries
-As tries, também conhecidas como árvores de prefixo, foram escolhidas justamente por serem muito rápidas pesquisando por prefixos. O professor da disciplina de Matemática Discreta citou brevemente elas e achamos que isso seria muito interessante para a funcionalidade de buscar por pessoas.
-
-A trie foi implementada no arquivo 'trie.c', juntamente com suas funções e seus nós. A implementação foi inspirada por um vídeo do [YouTube](https://www.youtube.com/watch?v=3CbFFVHQrk4), mas esse vídeo não possui a implementação de várias funções que precisamos para implementar funcionalidades chave. A trie foi implementada assim:
-
-![alt text](misc/trie.svg)
-
-Apenas um ponteiro para o nó da trie root. O vídeo não implementa desse jeito, mas preferimos abstrair e guardar o ponteiro raiz da trie em uma estrutura separada, deixando mais seguro e aumentando a facilidade de implementação em outros códigos.
-
-O nó da trie (o importante) é implementado assim:
-![alt text](misc/trienode.svg)
-
-A trie é uma árvore que tem n filhos (guardados num array), e cada filho representa uma letra. Cada filho é mapeado num array de 256 possibilidades (tabela ASCII), e um nó pode ter a flag *é folha*, o que representa que aquela combinação é uma palavra completa. A flag índice mapeia o índice da palavra que o nó representa com o ID do paciente no array paciente do BD.
-
-![alt text](misc/trieshow.svg)  
- _nós verdes representam nós normais e nós azuis são folhas_
-
-A trie é implementada de forma não otimizada, então ela está gastando memória para dedeu (todo nó VAI TER 256 filhos alocados, mesmo que sejam inicializados com NULL) e o uso de índices significa que, no caso dos nomes, que não são únicos, um nome repetido iria sobrescrever o índice, e isso é uma issue conhecida que vai ser corrigida em uma próxima versão. Eu também tive que fazer uma referência circular que não me agradou (db->trie e trie->db). Ela aloca 256 caracteres mapeados para a tabela ASCII, mas aceita outros tipos de tabelas de caracteres em suas pesquisas, causando comportamento inesperado.
-
-## Qual o motivo de ter duas tries?
-
-Simples: cada trie armazena uma sequência, então a redundância foi necessária para armazenar os números do CPF e os nomes.
-
-## Qual o motivo de usar uma trie?
-
-A trie permite a busca de forma mais eficiente (temporalmente, mas pode perder em memória). Enquanto uma busca em um array seria sequencial e tem complexidade O(n) (precisa-se buscar em todos os itens do array), a trie busca em O(m) (apenas o comprimento da string). Ou seja, ela escala muito melhor!
-
-# Array paciente
-
-O array paciente é um array dinamicamente alocado (aloca na execução do programa o número de pacientes do CSV). Ele armazena estruturas paciente.
+A lista paciente é uma lista encadeada. Ele armazena estruturas paciente (definidas em paciente.c).
 
 ![alt text](misc/paciente.svg)
 
 Nada de muito interessante aqui. Essas informações são retiradas do CSV, parseadas com scanf() (ISSO foi difícil...) e colocadas no array e nas tries. O problema da linguagem C é ter que alocar memória, então o tamanho máximo dos nomes é o número de caracteres no nome de [Pedro II](https://pt.wikipedia.org/wiki/Pedro_II_do_Brasil). 
 
-O banco de dados trabalha com a lógica de fazer as consultas e relacionar as tries com os pacientes do array.
+O banco de dados trabalha com a lógica de fazer as consultas e relacionar os pacientes da lista e dos pacientes.
 
 # Módulo UI Lib
 
