@@ -123,7 +123,9 @@ void atualizar_paciente(BDPaciente* db) {
         strcmp(nome,"-")==0?pc_get_nome(p):nome, 
         strcmp(idade_str,"-")==0?pc_get_idade(p):idade, 
         strcmp(data,"-")==0?pc_get_data_cadastro(p):data);
-    confirm = getchar(); getchar();
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    confirm = getchar();
     if (confirm == 'S' || confirm == 's') {
         db_update_paciente(db, id, strcmp(cpf,"-")==0?NULL:cpf, strcmp(nome,"-")==0?NULL:nome, idade, strcmp(data,"-")==0?NULL:data);
         db_save_to_csv(db, CSV_PATH);
